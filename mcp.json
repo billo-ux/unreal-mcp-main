@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "unrealMCP": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:\\Users\\stefa\\Downloads\\unreal-mcp-main\\Python",
+        "run",
+        "unreal_mcp_server.py"
+      ]
+    },
+    "mcp-installer": {
+      "command": "npx",
+      "args": [
+        "@anaisbetts/mcp-installer"
+      ]
+    }
+  }
+}
