@@ -188,11 +188,19 @@ def register_project_tools(mcp: FastMCP):
             Dict with success status and build output
         Example:
             build_project(ctx, configuration="Shipping")
-        TODO:
-            Implement project build logic.
         """
-        # TODO: Implement project build
-        return {"success": False, "message": "Not yet implemented"}
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            params = {"configuration": configuration}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("build_project", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error building project: {e}")
+            return {"success": False, "message": str(e)}
 
     @mcp.tool()
     def cook_project(ctx: Context, platforms: List[str]) -> Dict[str, Any]:
@@ -204,11 +212,19 @@ def register_project_tools(mcp: FastMCP):
             Dict with success status and cook output
         Example:
             cook_project(ctx, platforms=["Windows"])
-        TODO:
-            Implement project cook logic.
         """
-        # TODO: Implement project cook
-        return {"success": False, "message": "Not yet implemented"}
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            params = {"platforms": platforms}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("cook_project", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error cooking project: {e}")
+            return {"success": False, "message": str(e)}
 
     @mcp.tool()
     def package_project(ctx: Context, platform: str, output_path: str) -> Dict[str, Any]:
@@ -221,11 +237,19 @@ def register_project_tools(mcp: FastMCP):
             Dict with success status and package output
         Example:
             package_project(ctx, platform="Windows", output_path="/Builds/Windows")
-        TODO:
-            Implement project packaging logic.
         """
-        # TODO: Implement project packaging
-        return {"success": False, "message": "Not yet implemented"}
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            params = {"platform": platform, "output_path": output_path}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("package_project", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error packaging project: {e}")
+            return {"success": False, "message": str(e)}
 
     @mcp.tool()
     def run_source_control_command(ctx: Context, command: str, args: Dict[str, str] = None) -> Dict[str, Any]:

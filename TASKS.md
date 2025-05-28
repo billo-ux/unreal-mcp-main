@@ -30,8 +30,11 @@ A concise, logically grouped checklist for the refactor, validation, and expansi
 - [x] Advanced asset property configuration on creation (e.g., material parameters, animation curves)
 - [x] Asset/Blueprint validation tools
 - [x] Advanced asset reference search
+- [x] UI widget hierarchy management tools (reorder_widget, remove_widget_from_parent, get_widget_hierarchy): Implementation complete
 
-> All asset tool features, documentation, batch operations, property configuration, diagnostics, new asset types, and validation are now implemented and documented, with example runs and best practices included.
+### In Progress
+
+> All other asset tool features, documentation, batch operations, property configuration, diagnostics, new asset types, and validation are implemented and documented, with example runs and best practices included.
 
 ---
 
@@ -42,7 +45,6 @@ A concise, logically grouped checklist for the refactor, validation, and expansi
 - [x] Expanded UMG/widget tools (add_text_block_to_widget, add_button_to_widget, add_widget_to_viewport)
 - [x] Refactored editor tools (actor/level management, undo/redo, world/editor settings, commands)
 - [x] Selection tools for actors/assets in the editor
-- [x] Widget hierarchy management tools (reorder_widget, remove_widget_from_parent, get_widget_hierarchy)
 - [x] Expanded dynamic widget creation (images, sliders, progress bars, etc.)
 - [x] Documented usage and added example runs for new widget types and hierarchy tools
 - [x] Fixed and enabled the focus viewport tool
@@ -51,8 +53,11 @@ A concise, logically grouped checklist for the refactor, validation, and expansi
 - [x] Tools for managing widget hierarchy and dynamic parenting
 - [x] Tools for querying and reporting Unreal logs and diagnostics
 - [x] Tools for error reporting and diagnostics across all tool groups
+- [x] UI widget hierarchy management tools (reorder_widget, remove_widget_from_parent, get_widget_hierarchy): Implementation complete
 
-> All UI/editor tool features, widget hierarchy, dynamic widget creation, notifications, diagnostics, and documentation are now implemented and validated.
+### In Progress
+
+> All other UI/editor tool features, widget hierarchy, dynamic widget creation, notifications, diagnostics, and documentation are implemented and validated.
 
 ---
 
@@ -85,7 +90,9 @@ A concise, logically grouped checklist for the refactor, validation, and expansi
 - [x] Tools for querying and reporting Unreal logs and diagnostics
 - [x] Tools for error reporting and diagnostics across all tool groups
 
-> All orchestration, error reporting, diagnostics, analytics, CI/CD, and multi-agent workflows are implemented and validated.
+### In Progress
+
+> All other orchestration, error reporting, diagnostics, analytics, CI/CD, and multi-agent workflows are implemented and validated.
 
 ---
 

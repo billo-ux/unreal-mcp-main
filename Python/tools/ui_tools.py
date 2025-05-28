@@ -211,8 +211,17 @@ def register_ui_tools(mcp: FastMCP):
         Example:
             reorder_widget(ctx, widget_name="MyButton", new_index=1)
         """
-        # TODO: Implement widget reordering
-        return {"success": False, "message": "Not yet implemented"}
+        try:
+            params = {"widget_name": widget_name, "new_index": new_index}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("reorder_widget", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error reordering widget: {e}")
+            return {"success": False, "message": str(e)}
 
     @mcp.tool()
     def remove_widget_from_parent(ctx: Context, widget_name: str) -> Dict[str, str]:
@@ -225,8 +234,17 @@ def register_ui_tools(mcp: FastMCP):
         Example:
             remove_widget_from_parent(ctx, widget_name="MyTextBlock")
         """
-        # TODO: Implement widget removal
-        return {"success": False, "message": "Not yet implemented"}
+        try:
+            params = {"widget_name": widget_name}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("remove_widget_from_parent", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error removing widget from parent: {e}")
+            return {"success": False, "message": str(e)}
 
     @mcp.tool()
     def get_widget_hierarchy(ctx: Context, widget_name: str) -> Dict[str, object]:
@@ -239,5 +257,14 @@ def register_ui_tools(mcp: FastMCP):
         Example:
             get_widget_hierarchy(ctx, widget_name="MyPanel")
         """
-        # TODO: Implement widget hierarchy query
-        return {"success": False, "parent": None, "children": []} 
+        try:
+            params = {"widget_name": widget_name}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine", "parent": None, "children": []}
+            response = unreal.send_command("get_widget_hierarchy", params)
+            return response or {"success": False, "message": "No response from Unreal Engine", "parent": None, "children": []}
+        except Exception as e:
+            logger.error(f"Error getting widget hierarchy: {e}")
+            return {"success": False, "message": str(e), "parent": None, "children": []} 
