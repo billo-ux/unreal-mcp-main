@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Task List Management
+
+Guidelines for creating and managing task lists in markdown files to track project progress
+
+## Task List Creation
+
+1. Create task lists in a markdown file (in the project root):
+   - Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
+   - Include a clear title and description of the feature being implemented
+
+2. Structure the file with these sections:
+
+   
+   # Feature Name Implementation
+
+   Brief description of the feature and its purpose.
+
+   ## Completed Tasks
+
+   - [x] Task 1 that has been completed  
+   - [x] Task 2 that has been completed
+
+   ## In Progress Tasks
+
+   - [ ] Task 3 currently being worked on  
+   - [ ] Task 4 to be completed soon
+
+   ## Future Tasks
+
+   - [ ] Task 5 planned for future implementation  
+   - [ ] Task 6 planned for future implementation
+
+   ## Implementation Plan
+
+   Detailed description of how the feature will be implemented.
+
+
+
+This list will be updated, and deepen everytime we improve the scripts and go into more deep layers of details of each tool, like a tree.

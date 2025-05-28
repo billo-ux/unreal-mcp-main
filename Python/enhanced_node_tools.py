@@ -25,7 +25,8 @@ def register_enhanced_node_tools(mcp: FastMCP):
         rotation: List[float] = None,
         scale: List[float] = None,
         rotation_speed: float = 20.0,
-        rotation_axis: str = "Z"
+        rotation_axis: str = "Z",
+        spawn_in_level_editor: bool = True
     ) -> Dict[str, Any]:
         """
         Create an actor that rotates continuously.
@@ -35,29 +36,31 @@ def register_enhanced_node_tools(mcp: FastMCP):
             blueprint_name: Optional name for the Blueprint to create (if None, will generate one)
             location: Optional location [X, Y, Z]
             rotation: Optional rotation [Pitch, Yaw, Roll]
-            scale: Optional scale [X, Y, Z]
+            scale: Optional scale [X, Y, Z] (default: [1,1,1] if not provided)
             rotation_speed: Speed of rotation in degrees per second
             rotation_axis: Axis to rotate around ("X", "Y", or "Z")
-            
+            spawn_in_level_editor: If True, spawn the actor in the level editor; if False, do not spawn automatically (e.g., for BeginPlay logic only)
+        
         Returns:
             Dict containing success status and actor details
-        """
-        from unreal_mcp_server import get_unreal_connection
         
+        Example:
+            create_rotating_actor(ctx, actor_type="Cube", spawn_in_level_editor=True)
+        """
+        # This edit follows the 'tools' Cursor rule for MCP tools.
+        from unreal_mcp_server import get_unreal_connection
         try:
             unreal = get_unreal_connection()
             if not unreal:
                 logger.error("Failed to connect to Unreal Engine")
                 return {"success": False, "message": "Failed to connect to Unreal Engine"}
-            
             # Default values
             if location is None:
                 location = [0, 0, 0]
             if rotation is None:
                 rotation = [0, 0, 0]
             if scale is None:
-                scale = [1, 1, 1]
-            
+                scale = [1.0, 1.0, 1.0]
             # Generate Blueprint name if not provided
             if blueprint_name is None:
                 blueprint_name = f"BP_Rotating_{actor_type}"
@@ -291,12 +294,19 @@ def register_enhanced_node_tools(mcp: FastMCP):
                 return {"success": False, "message": f"Failed to connect Get Delta Seconds to Multiply: {connect_delta_multiply_response.get('error', 'Unknown error')}"}
             
             # Connect Multiply to Make Rotator
+            # Determine the correct pin name for the rotation axis
+            if rotation_axis.upper() == "X":
+                rot_pin = "Roll"
+            elif rotation_axis.upper() == "Y":
+                rot_pin = "Pitch"
+            else:
+                rot_pin = "Yaw"
             connect_multiply_rot_params = {
                 "blueprint_name": blueprint_name,
                 "source_node_id": multiply_node_id,
                 "source_pin": "ReturnValue",
                 "target_node_id": make_rot_node_id,
-                "target_pin": rotation_axis.upper() == "X" ? "Roll" : (rotation_axis.upper() == "Y" ? "Pitch" : "Yaw")
+                "target_pin": rot_pin
             }
             
             connect_multiply_rot_response = unreal.send_command("connect_blueprint_nodes", connect_multiply_rot_params)
@@ -346,33 +356,33 @@ def register_enhanced_node_tools(mcp: FastMCP):
                 logger.error(f"Failed to compile Blueprint: {compile_response}")
                 return {"success": False, "message": f"Failed to compile Blueprint: {compile_response.get('error', 'Unknown error')}"}
             
-            # Spawn the actor in the level
-            spawn_params = {
-                "blueprint_name": blueprint_name,
-                "actor_name": f"Rotating{actor_type}",
-                "location": location,
-                "rotation": rotation,
-                "scale": scale
-            }
-            
-            spawn_response = unreal.send_command("spawn_blueprint_actor", spawn_params)
-            
-            if not spawn_response or spawn_response.get("status") != "success":
-                logger.error(f"Failed to spawn actor: {spawn_response}")
-                return {"success": False, "message": f"Failed to spawn actor: {spawn_response.get('error', 'Unknown error')}"}
-            
-            actor_name = spawn_response.get("result", {}).get("actor_name", "")
-            
+            # Only spawn in the level editor if requested
+            if spawn_in_level_editor:
+                spawn_params = {
+                    "blueprint_name": blueprint_name,
+                    "actor_name": f"Rotating{actor_type}",
+                    "location": location,
+                    "rotation": rotation,
+                    "scale": scale
+                }
+                spawn_response = unreal.send_command("spawn_blueprint_actor", spawn_params)
+                if not spawn_response or spawn_response.get("status") != "success":
+                    logger.error(f"Failed to spawn actor: {spawn_response}")
+                    return {"success": False, "message": f"Failed to spawn actor: {spawn_response.get('error', 'Unknown error')}"}
+                actor_name = spawn_response.get("result", {}).get("actor_name", "")
+            else:
+                actor_name = None
             return {
                 "success": True,
-                "message": f"Successfully created rotating {actor_type} at {location}",
+                "message": f"Successfully created rotating {actor_type} Blueprint.",
                 "blueprint_name": blueprint_name,
                 "actor_name": actor_name,
                 "location": location,
                 "rotation": rotation,
                 "scale": scale,
                 "rotation_speed": rotation_speed,
-                "rotation_axis": rotation_axis
+                "rotation_axis": rotation_axis,
+                "spawn_in_level_editor": spawn_in_level_editor
             }
             
         except Exception as e:
@@ -768,7 +778,7 @@ def register_enhanced_node_tools(mcp: FastMCP):
                     logger.error(f"Failed to compile Blueprint: {compile_response}")
                     return {"success": False, "message": f"Failed to compile Blueprint: {compile_response.get('error', 'Unknown error')}"}
                 
-                # Spawn the actor in the level
+                # Spawn the actor in the level editor (not just for testing)
                 spawn_params = {
                     "blueprint_name": blueprint_name,
                     "actor_name": actor_name,

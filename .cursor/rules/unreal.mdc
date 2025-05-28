@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Working with Unreal Engine
 
-- We are using Unreal Engine 5.5.4, so be extremely cautious of using deprecated or outdated APIs, includes or practices.
+- We are using Unreal Engine 5.x.x, so be extremely cautious of using deprecated or outdated APIs, includes or practices.
 
 ## Coordinate System
 

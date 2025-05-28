@@ -6,7 +6,7 @@ This module provides tools for controlling the Unreal Editor viewport and other 
 
 import logging
 from typing import Dict, List, Any, Optional
-from mcp.server.fastmcp import FastMCP, Context
+from fastmcp import FastMCP, Context
 
 # Get logger
 logger = logging.getLogger("UnrealMCP")
@@ -81,63 +81,41 @@ def register_editor_tools(mcp: FastMCP):
         name: str,
         type: str,
         location: List[float] = [0.0, 0.0, 0.0],
-        rotation: List[float] = [0.0, 0.0, 0.0]
+        rotation: List[float] = [0.0, 0.0, 0.0],
+        scale: List[float] = None
     ) -> Dict[str, Any]:
-        """Create a new actor in the current level.
-        
-        Args:
-            ctx: The MCP context
-            name: The name to give the new actor (must be unique)
-            type: The type of actor to create (e.g. StaticMeshActor, PointLight)
-            location: The [x, y, z] world location to spawn at
-            rotation: The [pitch, yaw, roll] rotation in degrees
-            
-        Returns:
-            Dict containing the created actor's properties
-        """
+        """Create a new actor in the current level."""
         from unreal_mcp_server import get_unreal_connection
-        
         try:
             unreal = get_unreal_connection()
             if not unreal:
                 logger.error("Failed to connect to Unreal Engine")
                 return {"success": False, "message": "Failed to connect to Unreal Engine"}
-            
-            # Ensure all parameters are properly formatted
             params = {
                 "name": name,
-                "type": type.upper(),  # Make sure type is uppercase
+                "type": type.upper(),
                 "location": location,
                 "rotation": rotation
             }
-            
-            # Validate location and rotation formats
+            if scale is not None:
+                params["scale"] = scale
             for param_name in ["location", "rotation"]:
                 param_value = params[param_name]
                 if not isinstance(param_value, list) or len(param_value) != 3:
                     logger.error(f"Invalid {param_name} format: {param_value}. Must be a list of 3 float values.")
                     return {"success": False, "message": f"Invalid {param_name} format. Must be a list of 3 float values."}
-                # Ensure all values are float
                 params[param_name] = [float(val) for val in param_value]
-            
             logger.info(f"Creating actor '{name}' of type '{type}' with params: {params}")
             response = unreal.send_command("spawn_actor", params)
-            
             if not response:
                 logger.error("No response from Unreal Engine")
                 return {"success": False, "message": "No response from Unreal Engine"}
-            
-            # Log the complete response for debugging
             logger.info(f"Actor creation response: {response}")
-            
-            # Handle error responses correctly
             if response.get("status") == "error":
                 error_message = response.get("error", "Unknown error")
                 logger.error(f"Error creating actor: {error_message}")
                 return {"success": False, "message": error_message}
-            
             return response
-            
         except Exception as e:
             error_msg = f"Error creating actor: {e}"
             logger.error(error_msg)
@@ -197,20 +175,25 @@ def register_editor_tools(mcp: FastMCP):
     
     @mcp.tool()
     def get_actor_properties(ctx: Context, name: str) -> Dict[str, Any]:
-        """Get all properties of an actor."""
+        """
+        Get all properties of an actor.
+        Args:
+            name: Name of the actor
+        Returns:
+            Dict of actor properties
+        Example:
+            get_actor_properties(ctx, "Cube1")
+        """
         from unreal_mcp_server import get_unreal_connection
-        
         try:
             unreal = get_unreal_connection()
             if not unreal:
                 logger.error("Failed to connect to Unreal Engine")
                 return {"success": False, "message": "Failed to connect to Unreal Engine"}
-                
             response = unreal.send_command("get_actor_properties", {
                 "name": name
             })
             return response or {}
-            
         except Exception as e:
             logger.error(f"Error getting properties: {e}")
             return {}
@@ -220,40 +203,35 @@ def register_editor_tools(mcp: FastMCP):
         ctx: Context,
         name: str,
         property_name: str,
-        property_value,
+        property_value: str,
     ) -> Dict[str, Any]:
         """
         Set a property on an actor.
-        
         Args:
             name: Name of the actor
             property_name: Name of the property to set
-            property_value: Value to set the property to
-            
+            property_value: Value to set the property to (as a string)
         Returns:
             Dict containing response from Unreal with operation status
+        Example:
+            set_actor_property(ctx, "Cube1", "bHidden", "True")
         """
         from unreal_mcp_server import get_unreal_connection
-        
         try:
             unreal = get_unreal_connection()
             if not unreal:
                 logger.error("Failed to connect to Unreal Engine")
                 return {"success": False, "message": "Failed to connect to Unreal Engine"}
-                
             response = unreal.send_command("set_actor_property", {
                 "name": name,
                 "property_name": property_name,
                 "property_value": property_value
             })
-            
             if not response:
                 logger.error("No response from Unreal Engine")
                 return {"success": False, "message": "No response from Unreal Engine"}
-            
             logger.info(f"Set actor property response: {response}")
             return response
-            
         except Exception as e:
             error_msg = f"Error setting actor property: {e}"
             logger.error(error_msg)
@@ -312,55 +290,37 @@ def register_editor_tools(mcp: FastMCP):
         blueprint_name: str,
         actor_name: str,
         location: List[float] = [0.0, 0.0, 0.0],
-        rotation: List[float] = [0.0, 0.0, 0.0]
+        rotation: List[float] = [0.0, 0.0, 0.0],
+        scale: List[float] = None
     ) -> Dict[str, Any]:
-        """Spawn an actor from a Blueprint.
-        
-        Args:
-            ctx: The MCP context
-            blueprint_name: Name of the Blueprint to spawn from
-            actor_name: Name to give the spawned actor
-            location: The [x, y, z] world location to spawn at
-            rotation: The [pitch, yaw, roll] rotation in degrees
-            
-        Returns:
-            Dict containing the spawned actor's properties
-        """
+        """Spawn an actor from a Blueprint."""
         from unreal_mcp_server import get_unreal_connection
-        
         try:
             unreal = get_unreal_connection()
             if not unreal:
                 logger.error("Failed to connect to Unreal Engine")
                 return {"success": False, "message": "Failed to connect to Unreal Engine"}
-            
-            # Ensure all parameters are properly formatted
             params = {
                 "blueprint_name": blueprint_name,
                 "actor_name": actor_name,
                 "location": location or [0.0, 0.0, 0.0],
                 "rotation": rotation or [0.0, 0.0, 0.0]
             }
-            
-            # Validate location and rotation formats
+            if scale is not None:
+                params["scale"] = scale
             for param_name in ["location", "rotation"]:
                 param_value = params[param_name]
                 if not isinstance(param_value, list) or len(param_value) != 3:
                     logger.error(f"Invalid {param_name} format: {param_value}. Must be a list of 3 float values.")
                     return {"success": False, "message": f"Invalid {param_name} format. Must be a list of 3 float values."}
-                # Ensure all values are float
                 params[param_name] = [float(val) for val in param_value]
-            
             logger.info(f"Spawning blueprint actor with params: {params}")
             response = unreal.send_command("spawn_blueprint_actor", params)
-            
             if not response:
                 logger.error("No response from Unreal Engine")
                 return {"success": False, "message": "No response from Unreal Engine"}
-            
             logger.info(f"Spawn blueprint actor response: {response}")
             return response
-            
         except Exception as e:
             error_msg = f"Error spawning blueprint actor: {e}"
             logger.error(error_msg)
@@ -473,11 +433,19 @@ def register_editor_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def run_editor_command(ctx: Context, command: str, args: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Run a generic editor command (with security checks)."""
+    def run_editor_command(ctx: Context, command: str, args: Dict[str, str] = None) -> Dict[str, Any]:
+        """
+        Run a generic editor command (with security checks).
+        Args:
+            command: Name of the editor command (must be whitelisted)
+            args: Dictionary of arguments for the command (optional)
+        Returns:
+            Dict with success status and command response
+        Example:
+            run_editor_command(ctx, "rebuild_navigation", {})
+        """
         from unreal_mcp_server import get_unreal_connection
         try:
-            # Security: Only allow whitelisted commands
             allowed_commands = {"rebuild_navigation", "build_lighting", "play_in_editor"}
             if command not in allowed_commands:
                 logger.error(f"Command '{command}' is not allowed.")
@@ -494,7 +462,13 @@ def register_editor_tools(mcp: FastMCP):
 
     @mcp.tool()
     def get_world_settings(ctx: Context) -> Dict[str, Any]:
-        """Get world settings."""
+        """
+        Get world settings.
+        Returns:
+            Dict of world settings
+        Example:
+            get_world_settings(ctx)
+        """
         from unreal_mcp_server import get_unreal_connection
         try:
             unreal = get_unreal_connection()
@@ -508,8 +482,16 @@ def register_editor_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def set_world_settings(ctx: Context, settings: Dict[str, Any]) -> Dict[str, Any]:
-        """Set world settings."""
+    def set_world_settings(ctx: Context, settings: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Set world settings.
+        Args:
+            settings: Dictionary of world settings to set (key-value pairs as strings)
+        Returns:
+            Dict with success status and response
+        Example:
+            set_world_settings(ctx, {"GravityZ": "-980.0"})
+        """
         from unreal_mcp_server import get_unreal_connection
         try:
             unreal = get_unreal_connection()
@@ -524,7 +506,13 @@ def register_editor_tools(mcp: FastMCP):
 
     @mcp.tool()
     def get_editor_preferences(ctx: Context) -> Dict[str, Any]:
-        """Get editor preferences."""
+        """
+        Get editor preferences.
+        Returns:
+            Dict of editor preferences
+        Example:
+            get_editor_preferences(ctx)
+        """
         from unreal_mcp_server import get_unreal_connection
         try:
             unreal = get_unreal_connection()
@@ -538,8 +526,16 @@ def register_editor_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def set_editor_preferences(ctx: Context, preferences: Dict[str, Any]) -> Dict[str, Any]:
-        """Set editor preferences."""
+    def set_editor_preferences(ctx: Context, preferences: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Set editor preferences.
+        Args:
+            preferences: Dictionary of editor preferences to set (key-value pairs as strings)
+        Returns:
+            Dict with success status and response
+        Example:
+            set_editor_preferences(ctx, {"bShowFPS": "True"})
+        """
         from unreal_mcp_server import get_unreal_connection
         try:
             unreal = get_unreal_connection()
@@ -551,5 +547,83 @@ def register_editor_tools(mcp: FastMCP):
         except Exception as e:
             logger.error(f"Error setting editor preferences: {e}")
             return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def select_actors(ctx: Context, names: List[str]) -> Dict[str, Any]:
+        """
+        Select actors in the current level by name.
+        Args:
+            names: List of actor names to select
+        Returns:
+            Dict with success status and list of selected actors
+        Example:
+            select_actors(ctx, ["Cube1", "Sphere2"])
+        """
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("select_actors", {"names": names})
+            if not response or response.get("status") != "success":
+                logger.error(f"Failed to select actors: {response}")
+                return {"success": False, "message": f"Failed to select actors: {response.get('error', 'Unknown error')}", "selected": []}
+            selected = response.get("result", {}).get("selected", [])
+            return {"success": True, "selected": selected}
+        except Exception as e:
+            logger.error(f"Error selecting actors: {e}")
+            return {"success": False, "message": str(e), "selected": []}
+
+    @mcp.tool()
+    def deselect_actors(ctx: Context, names: List[str]) -> Dict[str, Any]:
+        """
+        Deselect actors in the current level by name.
+        Args:
+            names: List of actor names to deselect
+        Returns:
+            Dict with success status and list of remaining selected actors
+        Example:
+            deselect_actors(ctx, ["Cube1"])
+        """
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("deselect_actors", {"names": names})
+            if not response or response.get("status") != "success":
+                logger.error(f"Failed to deselect actors: {response}")
+                return {"success": False, "message": f"Failed to deselect actors: {response.get('error', 'Unknown error')}", "selected": []}
+            selected = response.get("result", {}).get("selected", [])
+            return {"success": True, "selected": selected}
+        except Exception as e:
+            logger.error(f"Error deselecting actors: {e}")
+            return {"success": False, "message": str(e), "selected": []}
+
+    @mcp.tool()
+    def get_selected_actors(ctx: Context) -> List[str]:
+        """
+        Get the list of currently selected actors in the editor.
+        Returns:
+            List of selected actor names
+        Example:
+            get_selected_actors(ctx)
+        """
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return []
+            response = unreal.send_command("get_selected_actors", {})
+            if not response or response.get("status") != "success":
+                logger.error(f"Failed to get selected actors: {response}")
+                return []
+            return response.get("result", {}).get("selected", [])
+        except Exception as e:
+            logger.error(f"Error getting selected actors: {e}")
+            return []
 
     logger.info("Editor tools registered successfully")
