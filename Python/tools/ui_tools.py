@@ -154,4 +154,71 @@ def register_ui_tools(mcp: FastMCP):
             return response or {"success": False, "message": "No response from Unreal Engine"}
         except Exception as e:
             logger.error(f"Error setting text block binding: {e}")
-            return {"success": False, "message": str(e)} 
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def set_widget_parent(ctx: Context, widget_name: str, parent_name: str) -> Dict[str, str]:
+        """
+        Set the parent of a widget for dynamic hierarchy management.
+        Args:
+            widget_name: Name of the widget to reparent
+            parent_name: Name of the new parent widget
+        Returns:
+            Dict with success status and message
+        Example:
+            set_widget_parent(ctx, "ChildWidget", "ParentWidget")
+        """
+        try:
+            params = {"widget_name": widget_name, "parent_name": parent_name}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("set_widget_parent", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error setting widget parent: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def reorder_widget(ctx: Context, widget_name: str, new_index: int) -> Dict[str, str]:
+        """
+        Reorder a widget within its parent container.
+        Args:
+            widget_name: Name of the widget to reorder
+            new_index: New index/position within the parent
+        Returns:
+            Dict with success status and message
+        Example:
+            reorder_widget(ctx, "MyButton", 1)
+        """
+        # TODO: Implement widget reordering
+        return {"success": False, "message": "Not yet implemented"}
+
+    @mcp.tool()
+    def remove_widget_from_parent(ctx: Context, widget_name: str) -> Dict[str, str]:
+        """
+        Remove a widget from its parent container.
+        Args:
+            widget_name: Name of the widget to remove
+        Returns:
+            Dict with success status and message
+        Example:
+            remove_widget_from_parent(ctx, "MyTextBlock")
+        """
+        # TODO: Implement widget removal
+        return {"success": False, "message": "Not yet implemented"}
+
+    @mcp.tool()
+    def get_widget_hierarchy(ctx: Context, widget_name: str) -> Dict[str, List[str]]:
+        """
+        Get the hierarchy (parent and children) of a widget.
+        Args:
+            widget_name: Name of the widget to query
+        Returns:
+            Dict with parent and children widget names
+        Example:
+            get_widget_hierarchy(ctx, "MyPanel")
+        """
+        # TODO: Implement widget hierarchy query
+        return {"success": False, "parent": None, "children": []} 

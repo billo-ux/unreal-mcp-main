@@ -267,6 +267,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Material Instance
         Returns:
             Dict with success status and asset path
+        Example:
+            create_material_instance(ctx, "MI_MyMaterial", "/Game/Materials/M_Master")
         """
         try:
             params = {"asset_name": name, "parent_material": parent_material, "save_path": save_path}
@@ -293,6 +295,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Niagara Emitter
         Returns:
             Dict with success status and asset path
+        Example:
+            create_niagara_emitter(ctx, "MyEmitter")
         """
         try:
             params = {"asset_name": name, "save_path": save_path}
@@ -346,6 +350,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Sound Cue
         Returns:
             Dict with success status and asset path
+        Example:
+            create_sound_cue(ctx, "MySoundCue")
         """
         try:
             params = {"asset_name": name, "save_path": save_path}
@@ -373,6 +379,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Sound Wave
         Returns:
             Dict with success status and asset path
+        Example:
+            create_sound_wave(ctx, "MySound", "/path/to/sound.wav")
         """
         try:
             params = {"asset_name": name, "source_file": source_file, "save_path": save_path}
@@ -400,6 +408,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Font
         Returns:
             Dict with success status and asset path
+        Example:
+            create_font(ctx, "MyFont", "/path/to/font.ttf")
         """
         try:
             params = {"asset_name": name, "source_file": source_file, "save_path": save_path}
@@ -427,6 +437,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Curve
         Returns:
             Dict with success status and asset path
+        Example:
+            create_curve(ctx, "MyCurve", "FloatCurve")
         """
         try:
             params = {"asset_name": name, "curve_type": curve_type, "save_path": save_path}
@@ -454,6 +466,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             save_path: Path to save the Data Table
         Returns:
             Dict with success status and asset path
+        Example:
+            create_data_table(ctx, "MyDataTable", "MyRowStruct")
         """
         try:
             params = {"asset_name": name, "row_struct": row_struct, "save_path": save_path}
@@ -483,6 +497,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             Dict with success status and asset path
         Note:
             Unreal may require additional setup for struct fields after creation.
+        Example:
+            create_struct(ctx, "MyStruct", {"Health": "float", "Name": "FString"})
         """
         try:
             params = {"asset_name": name, "fields": fields, "save_path": save_path}
@@ -512,6 +528,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             Dict with success status and asset path
         Note:
             Unreal may require additional setup for enum entries after creation.
+        Example:
+            create_enum(ctx, "MyEnum", ["Idle", "Running", "Jumping"])
         """
         try:
             params = {"asset_name": name, "entries": entries, "save_path": save_path}
@@ -541,6 +559,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             Dict with success status and asset path
         Note:
             Unreal may require additional setup for brush properties after creation.
+        Example:
+            create_slate_brush(ctx, "MyBrush", "/Game/Textures/T_Brush")
         """
         try:
             params = {"asset_name": name, "texture_path": texture_path, "save_path": save_path}
@@ -570,6 +590,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             Dict with success status and asset path
         Note:
             Unreal may require additional setup for sprite properties after creation.
+        Example:
+            create_paper2d_sprite(ctx, "MySprite", "/Game/Textures/T_Sprite")
         """
         try:
             params = {"asset_name": name, "texture_path": texture_path, "save_path": save_path}
@@ -601,6 +623,8 @@ def register_basic_asset_tools(mcp: FastMCP):
             Dict with success status and asset path
         Note:
             This is a high-complexity asset and may require additional setup in Unreal Editor after creation.
+        Example:
+            create_paper2d_tile_map(ctx, "MyTileMap", 10, 10, "/Game/TileSets/T_TileSet")
         """
         try:
             params = {"asset_name": name, "width": width, "height": height, "tile_set": tile_set, "save_path": save_path}
