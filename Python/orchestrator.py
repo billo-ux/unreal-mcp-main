@@ -19,6 +19,10 @@ import sys
 import logging
 from typing import List, Dict, Any
 import time
+import importlib
+from tools import asset_management_tools
+from tools import ui_tools
+from tools import project_tools
 
 # Import tool APIs (assume FastMCP or direct tool calls)
 # from tools.asset_management_tools import ...
@@ -33,40 +37,67 @@ RETRY_DELAY = 2  # seconds
 
 def query_project_context() -> Dict[str, Any]:
     """Query project/asset context using inventory and metadata tools."""
-    # TODO: Call list_assets, get_asset_metadata, etc.
-    return {}
+    ctx = asset_management_tools.Context()
+    assets = asset_management_tools.list_assets(ctx, with_metadata=True)
+    # For brevity, get metadata for first 3 assets only
+    asset_list = assets.get('assets', []) if assets.get('success') else []
+    metadata = []
+    for asset in asset_list[:3]:
+        path = asset.get('path') if isinstance(asset, dict) else asset
+        if path:
+            meta = asset_management_tools.get_asset_metadata(ctx, path)
+            metadata.append(meta)
+    return {'assets': asset_list, 'metadata': metadata}
 
 def extract_examples(asset_type: str, count: int = 3) -> List[Dict[str, Any]]:
     """Extract real asset/code/Blueprint/script examples for a given type."""
-    # TODO: Call extract_asset_examples tool
-    return []
+    ctx = asset_management_tools.Context()
+    result = asset_management_tools.extract_asset_examples(ctx, asset_type, count)
+    return result.get('examples', []) if result.get('success', True) else []
 
 def plan_steps(prompt: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Plan a sequence of tool calls from the prompt and context."""
-    # TODO: Use LLM or rule-based planner
+    # For now, use a simple rule-based plan for the dungeon prompt
+    if 'dungeon' in prompt.lower():
+        return [
+            {'tool': 'create_level', 'args': {'level_name': 'ProceduralDungeon'}},
+            {'tool': 'batch_create_assets', 'args': {'assets': [
+                {'type': 'Blueprint', 'name': 'BP_Room', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Monster1', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Monster2', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Monster3', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Monster4', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Monster5', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_PlayerSpawn', 'save_path': '/Game/Blueprints'},
+                {'type': 'Blueprint', 'name': 'BP_Exit', 'save_path': '/Game/Blueprints'}
+            ]}},
+            # Add more steps as needed
+        ]
+    # Default: no plan
     return []
 
 def prompt_for_ambiguity(step: Dict[str, Any]) -> Dict[str, Any]:
-    """Placeholder for prompting user or LLM if a step is ambiguous."""
-    logger.warning(f"Ambiguous step detected: {step}. Prompting for clarification...")
-    # TODO: Implement user/LLM prompt
+    logger.warning(f"Ambiguous step detected: {step}. Skipping for now.")
     return step
 
 def execute_steps(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Execute each planned step, capturing outputs and errors. Implements feedback loop and retry logic."""
     results = []
+    ctx = asset_management_tools.Context()
     for step in steps:
         attempt = 0
         while attempt <= MAX_RETRIES:
             try:
                 logger.info(f"Executing step: {step} (Attempt {attempt+1})")
-                # TODO: Dispatch to the correct tool and capture output/error
-                # Simulate ambiguous step detection
-                if step.get("ambiguous", False):
-                    step = prompt_for_ambiguity(step)
-                # Simulate tool call
-                output = None  # Replace with actual tool call
-                error = None   # Replace with actual error if any
+                tool = step.get('tool')
+                args = step.get('args', {})
+                if tool == 'create_level':
+                    output = ui_tools.create_umg_widget_blueprint(ctx, **args)  # Placeholder, replace with actual level creation
+                elif tool == 'batch_create_assets':
+                    output = asset_management_tools.batch_create_assets(ctx, **args)
+                else:
+                    output = {'success': False, 'message': f'Unknown tool: {tool}'}
+                error = None if output.get('success') else output.get('message')
                 if error:
                     raise Exception(error)
                 results.append({"step": step, "output": output, "error": None})

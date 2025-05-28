@@ -1,11 +1,18 @@
 """
 UI Tools for Unreal MCP.
 
-This module provides tools for creating and managing UMG widgets and UI elements.
+Best Practices (Cursor Rules):
+- Do not use Any, object, Optional, or Union types for parameters.
+- Use explicit types for all parameters; handle defaults inside the function.
+- Every @mcp.tool method must have a docstring with at least one usage example.
+- Always return a dict with 'success' and a clear message or result.
+- Handle errors robustly and log them.
+
+Example usage for each tool is provided in the docstring.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 from mcp.server.fastmcp import FastMCP, Context
 from unreal_mcp_server import get_unreal_connection
 
@@ -16,7 +23,7 @@ def register_ui_tools(mcp: FastMCP):
     # ... (tools will be added here in subsequent steps)
 
     @mcp.tool()
-    def create_umg_widget_blueprint(ctx: Context, widget_name: str, save_path: str = "/Game/UI") -> Dict[str, Any]:
+    def create_umg_widget_blueprint(ctx: Context, widget_name: str, save_path: str = "/Game/UI") -> Dict[str, str]:
         """
         Create a UMG Widget Blueprint.
         Args:
@@ -24,6 +31,8 @@ def register_ui_tools(mcp: FastMCP):
             save_path: Path to save the widget blueprint
         Returns:
             Dict with success status and asset path
+        Example:
+            create_umg_widget_blueprint(ctx, widget_name="MyWidget", save_path="/Game/UI")
         """
         try:
             params = {"widget_name": widget_name, "save_path": save_path}
@@ -38,7 +47,7 @@ def register_ui_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def add_text_block_to_widget(ctx: Context, widget_name: str, text: str, block_name: str = "TextBlock", position: List[int] = None) -> Dict[str, Any]:
+    def add_text_block_to_widget(ctx: Context, widget_name: str, text: str, block_name: str = "TextBlock", position: List[int] = None) -> Dict[str, str]:
         """
         Add a text block to a UMG widget.
         Args:
@@ -48,6 +57,8 @@ def register_ui_tools(mcp: FastMCP):
             position: [X, Y] position in the widget (default: [0, 0])
         Returns:
             Dict with success status
+        Example:
+            add_text_block_to_widget(ctx, widget_name="MyWidget", text="Hello", block_name="Title", position=[10, 10])
         """
         try:
             if position is None:
@@ -64,7 +75,7 @@ def register_ui_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def add_button_to_widget(ctx: Context, widget_name: str, button_name: str = "Button", position: List[int] = None) -> Dict[str, Any]:
+    def add_button_to_widget(ctx: Context, widget_name: str, button_name: str = "Button", position: List[int] = None) -> Dict[str, str]:
         """
         Add a button to a UMG widget.
         Args:
@@ -73,6 +84,8 @@ def register_ui_tools(mcp: FastMCP):
             position: [X, Y] position in the widget (default: [0, 0])
         Returns:
             Dict with success status
+        Example:
+            add_button_to_widget(ctx, widget_name="MyWidget", button_name="PlayButton", position=[20, 20])
         """
         try:
             if position is None:
@@ -89,7 +102,7 @@ def register_ui_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def bind_widget_event(ctx: Context, widget_name: str, element_name: str, event_name: str, handler_function: str) -> Dict[str, Any]:
+    def bind_widget_event(ctx: Context, widget_name: str, element_name: str, event_name: str, handler_function: str) -> Dict[str, str]:
         """
         Bind an event to a widget element.
         Args:
@@ -99,6 +112,8 @@ def register_ui_tools(mcp: FastMCP):
             handler_function: Name of the function to call
         Returns:
             Dict with success status
+        Example:
+            bind_widget_event(ctx, widget_name="MyWidget", element_name="PlayButton", event_name="OnClicked", handler_function="OnPlayClicked")
         """
         try:
             params = {"widget_name": widget_name, "element_name": element_name, "event_name": event_name, "handler_function": handler_function}
@@ -113,13 +128,15 @@ def register_ui_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def add_widget_to_viewport(ctx: Context, widget_name: str) -> Dict[str, Any]:
+    def add_widget_to_viewport(ctx: Context, widget_name: str) -> Dict[str, str]:
         """
         Add a widget to the viewport.
         Args:
             widget_name: Name of the widget blueprint
         Returns:
             Dict with success status
+        Example:
+            add_widget_to_viewport(ctx, widget_name="MyWidget")
         """
         try:
             params = {"widget_name": widget_name}
@@ -134,7 +151,7 @@ def register_ui_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def set_text_block_binding(ctx: Context, widget_name: str, block_name: str, binding_function: str) -> Dict[str, Any]:
+    def set_text_block_binding(ctx: Context, widget_name: str, block_name: str, binding_function: str) -> Dict[str, str]:
         """
         Set a binding for a text block in a widget.
         Args:
@@ -143,6 +160,8 @@ def register_ui_tools(mcp: FastMCP):
             binding_function: Name of the function to bind
         Returns:
             Dict with success status
+        Example:
+            set_text_block_binding(ctx, widget_name="MyWidget", block_name="Title", binding_function="GetTitleText")
         """
         try:
             params = {"widget_name": widget_name, "block_name": block_name, "binding_function": binding_function}
@@ -166,7 +185,7 @@ def register_ui_tools(mcp: FastMCP):
         Returns:
             Dict with success status and message
         Example:
-            set_widget_parent(ctx, "ChildWidget", "ParentWidget")
+            set_widget_parent(ctx, widget_name="ChildWidget", parent_name="ParentWidget")
         """
         try:
             params = {"widget_name": widget_name, "parent_name": parent_name}
@@ -190,7 +209,7 @@ def register_ui_tools(mcp: FastMCP):
         Returns:
             Dict with success status and message
         Example:
-            reorder_widget(ctx, "MyButton", 1)
+            reorder_widget(ctx, widget_name="MyButton", new_index=1)
         """
         # TODO: Implement widget reordering
         return {"success": False, "message": "Not yet implemented"}
@@ -204,13 +223,13 @@ def register_ui_tools(mcp: FastMCP):
         Returns:
             Dict with success status and message
         Example:
-            remove_widget_from_parent(ctx, "MyTextBlock")
+            remove_widget_from_parent(ctx, widget_name="MyTextBlock")
         """
         # TODO: Implement widget removal
         return {"success": False, "message": "Not yet implemented"}
 
     @mcp.tool()
-    def get_widget_hierarchy(ctx: Context, widget_name: str) -> Dict[str, List[str]]:
+    def get_widget_hierarchy(ctx: Context, widget_name: str) -> Dict[str, object]:
         """
         Get the hierarchy (parent and children) of a widget.
         Args:
@@ -218,7 +237,7 @@ def register_ui_tools(mcp: FastMCP):
         Returns:
             Dict with parent and children widget names
         Example:
-            get_widget_hierarchy(ctx, "MyPanel")
+            get_widget_hierarchy(ctx, widget_name="MyPanel")
         """
         # TODO: Implement widget hierarchy query
         return {"success": False, "parent": None, "children": []} 

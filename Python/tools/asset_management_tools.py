@@ -1,11 +1,18 @@
 """
 Asset Management Tools for Unreal MCP.
 
-This module provides tools for importing, exporting, renaming, and deleting assets in the Content Browser.
+Best Practices (Cursor Rules):
+- Do not use Any, object, Optional, or Union types for parameters.
+- Use explicit types for all parameters; handle defaults inside the function.
+- Every @mcp.tool method must have a docstring with at least one usage example.
+- Always return a dict with 'success' and a clear message or result.
+- Handle errors robustly and log them.
+
+Example usage for each tool is provided in the docstring.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 from mcp.server.fastmcp import FastMCP, Context
 from unreal_mcp_server import get_unreal_connection
 
@@ -16,7 +23,7 @@ def register_asset_management_tools(mcp: FastMCP):
     # ... (tools will be added here in subsequent steps)
 
     @mcp.tool()
-    def import_asset(ctx: Context, source_file: str, destination_path: str, asset_name: str) -> Dict[str, Any]:
+    def import_asset(ctx: Context, source_file: str, destination_path: str, asset_name: str) -> Dict[str, str]:
         """
         Import an asset into the Content Browser.
         Args:
@@ -25,6 +32,8 @@ def register_asset_management_tools(mcp: FastMCP):
             asset_name: Name for the imported asset
         Returns:
             Dict with success status and asset path
+        Example:
+            import_asset(ctx, source_file="/tmp/mesh.fbx", destination_path="/Game/Imported", asset_name="MyMesh")
         """
         try:
             params = {"source_file": source_file, "destination_path": destination_path, "asset_name": asset_name}
@@ -39,7 +48,7 @@ def register_asset_management_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def export_asset(ctx: Context, asset_path: str, export_path: str) -> Dict[str, Any]:
+    def export_asset(ctx: Context, asset_path: str, export_path: str) -> Dict[str, str]:
         """
         Export an asset from the Content Browser.
         Args:
@@ -47,6 +56,8 @@ def register_asset_management_tools(mcp: FastMCP):
             export_path: Destination path on disk
         Returns:
             Dict with success status and export path
+        Example:
+            export_asset(ctx, asset_path="/Game/Imported/MyMesh", export_path="/tmp/exported_mesh.fbx")
         """
         try:
             params = {"asset_path": asset_path, "export_path": export_path}
@@ -61,7 +72,7 @@ def register_asset_management_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def list_assets(ctx: Context, content_path: str = "/Game", with_metadata: bool = False) -> Dict[str, Any]:
+    def list_assets(ctx: Context, content_path: str = "/Game", with_metadata: bool = False) -> Dict[str, object]:
         """
         List all assets in a given Content Browser path, optionally including metadata for each asset.
         Args:
@@ -70,7 +81,7 @@ def register_asset_management_tools(mcp: FastMCP):
         Returns:
             Dict with asset names and paths, and optionally metadata
         Example:
-            list_assets(ctx, "/Game", with_metadata=True)
+            list_assets(ctx, content_path="/Game", with_metadata=True)
         """
         try:
             params = {"content_path": content_path, "with_metadata": with_metadata}
@@ -85,7 +96,7 @@ def register_asset_management_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def get_asset_metadata(ctx: Context, asset_path: str) -> Dict[str, Any]:
+    def get_asset_metadata(ctx: Context, asset_path: str) -> Dict[str, object]:
         """
         Fetch detailed metadata for a single asset.
         Args:
@@ -93,7 +104,7 @@ def register_asset_management_tools(mcp: FastMCP):
         Returns:
             Dict with metadata fields (type, class, tags, size, references, etc.)
         Example:
-            get_asset_metadata(ctx, "/Game/Blueprints/BP_MyActor")
+            get_asset_metadata(ctx, asset_path="/Game/Blueprints/BP_MyActor")
         """
         try:
             params = {"asset_path": asset_path}
@@ -108,7 +119,7 @@ def register_asset_management_tools(mcp: FastMCP):
             return {"success": False, "message": str(e)}
 
     @mcp.tool()
-    def extract_asset_examples(ctx: Context, asset_type: str, count: int = 3) -> Dict[str, List[Dict[str, str]]]:
+    def extract_asset_examples(ctx: Context, asset_type: str, count: int = 3) -> Dict[str, object]:
         """
         Extract real asset/code/Blueprint/script examples for a given asset type.
         Args:
@@ -117,7 +128,7 @@ def register_asset_management_tools(mcp: FastMCP):
         Returns:
             Dict with a list of example dicts, each containing asset path, name, and optionally code/blueprint/script snippet
         Example:
-            extract_asset_examples(ctx, "Blueprint", 2)
+            extract_asset_examples(ctx, asset_type="Blueprint", count=2)
         """
         try:
             params = {"asset_type": asset_type, "count": count}
@@ -132,7 +143,7 @@ def register_asset_management_tools(mcp: FastMCP):
             return {"success": False, "message": str(e), "examples": []}
 
     @mcp.tool()
-    def find_asset_references(ctx: Context, asset_path: str) -> Dict[str, List[str]]:
+    def find_asset_references(ctx: Context, asset_path: str) -> Dict[str, object]:
         """
         Find all references to a given asset in the project.
         Args:
@@ -140,7 +151,7 @@ def register_asset_management_tools(mcp: FastMCP):
         Returns:
             Dict with success status and a list of referencing assets/actors
         Example:
-            find_asset_references(ctx, "/Game/Materials/M_MyMaterial")
+            find_asset_references(ctx, asset_path="/Game/Materials/M_MyMaterial")
         """
         from unreal_mcp_server import get_unreal_connection
         try:

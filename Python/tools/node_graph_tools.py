@@ -1,6 +1,15 @@
 """
 Node & Graph Tools for Unreal MCP.
 
+Best Practices (Cursor Rules):
+- Do not use Any, object, Optional, or Union types for parameters.
+- Use explicit types for all parameters; handle defaults inside the function.
+- Every @mcp.tool method must have a docstring with at least one usage example.
+- Always return a dict with 'success' and a clear message or result (unless returning a list of names/actors, etc.).
+- Handle errors robustly and log them.
+
+Example usage for each tool is provided in the docstring.
+
 This module provides tools for manipulating Blueprint nodes, graphs, and variables.
 """
 
