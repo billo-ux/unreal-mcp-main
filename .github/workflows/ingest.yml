@@ -1,0 +1,24 @@
+name: Weekly EDC Ingest
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r tools/requirements.txt
+      - run: python tools/crawl_epic_learning.py && \
+             python tools/extract_rules.py && \
+             python tools/update_guidelines.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - run: |
+          git config user.name  "Guideline-Bot"
+          git config user.email "bot@example.com"
+          git add AI_GUIDELINES.md cache/consumed_sources.json
+          git commit -m "auto: weekly EDC guideline ingest" || echo "No changes"
+          git push 

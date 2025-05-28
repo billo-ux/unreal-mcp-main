@@ -187,7 +187,13 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleAddComponentToBluepri
     UBlueprint* Blueprint = FUnrealMCPCommonUtils::FindBlueprint(BlueprintName);
     if (!Blueprint)
     {
+        UE_LOG(LogTemp, Error, TEXT("HandleAddComponentToBlueprint - Blueprint not found: %s"), *BlueprintName);
         return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Blueprint not found: %s"), *BlueprintName));
+    }
+    if (!Blueprint->SimpleConstructionScript)
+    {
+        UE_LOG(LogTemp, Error, TEXT("HandleAddComponentToBlueprint - SimpleConstructionScript is NULL for blueprint %s"), *BlueprintName);
+        return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Invalid blueprint construction script"));
     }
 
     // Create the component - dynamically find the component class by name
@@ -315,6 +321,11 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleSetComponentProperty(
         UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Blueprint not found: %s"), *BlueprintName);
         return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Blueprint not found: %s"), *BlueprintName));
     }
+    if (!Blueprint->GeneratedClass)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Blueprint has no GeneratedClass: %s"), *BlueprintName);
+        return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Blueprint has no GeneratedClass: %s"), *BlueprintName));
+    }
     else
     {
         UE_LOG(LogTemp, Log, TEXT("SetComponentProperty - Blueprint found: %s (Class: %s)"), 
@@ -334,25 +345,23 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleSetComponentProperty(
     
     for (USCS_Node* Node : Blueprint->SimpleConstructionScript->GetAllNodes())
     {
-        if (Node)
+        if (!Node)
         {
-            UE_LOG(LogTemp, Verbose, TEXT("SetComponentProperty - Found node: %s"), *Node->GetVariableName().ToString());
-            if (Node->GetVariableName().ToString() == ComponentName)
-            {
-                ComponentNode = Node;
-                break;
-            }
+            UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Encountered NULL node in blueprint %s"), *BlueprintName);
+            continue;
         }
-        else
+        UE_LOG(LogTemp, Verbose, TEXT("SetComponentProperty - Found node: %s"), *Node->GetVariableName().ToString());
+        if (Node->GetVariableName().ToString() == ComponentName)
         {
-            UE_LOG(LogTemp, Warning, TEXT("SetComponentProperty - Found NULL node in blueprint"));
+            ComponentNode = Node;
+            break;
         }
     }
 
     if (!ComponentNode)
     {
-        UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Component not found: %s"), *ComponentName);
-        return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Component not found: %s"), *ComponentName));
+        UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Component not found: %s in blueprint %s"), *ComponentName, *BlueprintName);
+        return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Component not found: %s in blueprint %s"), *ComponentName, *BlueprintName));
     }
     else
     {
@@ -365,7 +374,7 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleSetComponentProperty(
     UObject* ComponentTemplate = ComponentNode->ComponentTemplate;
     if (!ComponentTemplate)
     {
-        UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Component template is NULL for %s"), *ComponentName);
+        UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Component template is NULL for %s in blueprint %s"), *ComponentName, *BlueprintName);
         return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Invalid component template"));
     }
 
@@ -517,9 +526,7 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleSetComponentProperty(
         FProperty* Property = FindFProperty<FProperty>(ComponentTemplate->GetClass(), *PropertyName);
         if (!Property)
         {
-            UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Property %s not found on component %s"), 
-                *PropertyName, *ComponentName);
-            
+            UE_LOG(LogTemp, Error, TEXT("SetComponentProperty - Property %s not found on component %s in blueprint %s"), *PropertyName, *ComponentName, *BlueprintName);
             // List all available properties for this component
             UE_LOG(LogTemp, Warning, TEXT("SetComponentProperty - Available properties for %s:"), *ComponentName);
             for (TFieldIterator<FProperty> PropIt(ComponentTemplate->GetClass()); PropIt; ++PropIt)
@@ -527,9 +534,8 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintCommands::HandleSetComponentProperty(
                 FProperty* Prop = *PropIt;
                 UE_LOG(LogTemp, Warning, TEXT("  - %s (%s)"), *Prop->GetName(), *Prop->GetCPPType());
             }
-            
             return FUnrealMCPCommonUtils::CreateErrorResponse(
-                FString::Printf(TEXT("Property %s not found on component %s"), *PropertyName, *ComponentName));
+                FString::Printf(TEXT("Property %s not found on component %s in blueprint %s"), *PropertyName, *ComponentName, *BlueprintName));
         }
         else
         {

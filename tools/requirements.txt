@@ -1,0 +1,9 @@
+beautifulsoup4
+lxml
+youtube-transcript-api
+openai
+tiktoken
+markdown-it-py
+pyyaml
+selenium
+webdriver-manager 

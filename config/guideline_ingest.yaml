@@ -1,0 +1,10 @@
+model: gpt-3.5-turbo
+rule_len: 140
+chunk_tokens: 1000
+categories:
+  - Blueprint
+  - Geometry
+  - Materials
+  - Performance
+  - Testing
+  - SourceControl 

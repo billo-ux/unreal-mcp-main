@@ -58,6 +58,10 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintNodeCommands::HandleCommand(const FSt
     {
         return HandleFindBlueprintNodes(Params);
     }
+    else if (CommandType == TEXT("set_blueprint_node_pin_value"))
+    {
+        return HandleSetBlueprintNodePinValue(Params);
+    }
     
     return FUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Unknown blueprint node command: %s"), *CommandType));
 }
@@ -920,5 +924,40 @@ TSharedPtr<FJsonObject> FUnrealMCPBlueprintNodeCommands::HandleFindBlueprintNode
     TSharedPtr<FJsonObject> ResultObj = MakeShared<FJsonObject>();
     ResultObj->SetArrayField(TEXT("node_guids"), NodeGuidArray);
     
+    return ResultObj;
+}
+
+TSharedPtr<FJsonObject> FUnrealMCPBlueprintNodeCommands::HandleSetBlueprintNodePinValue(const TSharedPtr<FJsonObject>& Params)
+{
+    FString BlueprintName, NodeId, PinName, Value;
+    if (!Params->TryGetStringField(TEXT("blueprint_name"), BlueprintName) ||
+        !Params->TryGetStringField(TEXT("node_id"), NodeId) ||
+        !Params->TryGetStringField(TEXT("pin_name"), PinName) ||
+        !Params->TryGetStringField(TEXT("value"), Value))
+    {
+        return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Missing required parameter"));
+    }
+
+    UBlueprint* Blueprint = FUnrealMCPCommonUtils::FindBlueprint(BlueprintName);
+    if (!Blueprint) return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Blueprint not found"));
+
+    UEdGraph* EventGraph = FUnrealMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+    if (!EventGraph) return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Failed to get event graph"));
+
+    UEdGraphNode* Node = nullptr;
+    for (UEdGraphNode* N : EventGraph->Nodes)
+        if (N->NodeGuid.ToString() == NodeId) { Node = N; break; }
+    if (!Node) return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Node not found"));
+
+    UEdGraphPin* Pin = FUnrealMCPCommonUtils::FindPin(Node, PinName);
+    if (!Pin) return FUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Pin not found"));
+
+    Pin->DefaultValue = Value;
+    FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
+
+    TSharedPtr<FJsonObject> ResultObj = MakeShared<FJsonObject>();
+    ResultObj->SetStringField(TEXT("node_id"), NodeId);
+    ResultObj->SetStringField(TEXT("pin_name"), PinName);
+    ResultObj->SetStringField(TEXT("value"), Value);
     return ResultObj;
 } 

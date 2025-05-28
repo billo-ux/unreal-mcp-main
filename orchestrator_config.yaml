@@ -1,0 +1,20 @@
+# All keys are optional; defaults in code will be used when absent.
+retries: 3           # how many times to retry a failing tool call
+retry_delay: 4       # seconds between retries
+log_level: INFO      # DEBUG | INFO | WARNING | ERROR | CRITICAL
+
+# Planner can be 'rule_based' (current hard-coded logic) or 'llm'
+planner:
+  type: rule_based
+
+# Default asset save path when a step omits one
+default_asset_path: /Game/Blueprints
+
+# Extra tool modules to auto-discover (imported at start-up)
+tool_modules:
+  - tools.asset_management_tools
+  - tools.ui_tools
+  - tools.project_tools
+
+# Where to drop a JSON summary of the run (relative to repo root)
+results_path: orchestration_results 

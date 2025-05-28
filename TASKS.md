@@ -191,3 +191,121 @@ A concise, logically grouped checklist for the refactor, validation, and expansi
 
 (See previous section for ongoing guidance and future improvements.)
 
+# Unreal MCP Plugin Improvements
+
+This document tracks improvements to the Unreal MCP plugin, specifically for Blueprint property setting safety.
+
+## Completed Tasks
+
+- [x] Added robust null pointer checks and error handling to HandleSetComponentProperty in UnrealMCPBlueprintCommands.cpp
+- [x] Improved error logging for all failure cases, especially before property access and casting
+- [x] Refactored similar error handling in other MCP command handlers
+- [x] Added automated tests for plugin command error cases
+
+## In Progress Tasks
+
+- [ ] Further test the failsafe changes in various edge cases
+
+## Future Tasks
+
+## Implementation Plan
+
+- The function HandleSetComponentProperty now checks for null pointers at every stage (blueprint, component node, component template, property) and logs detailed errors if any are missing.
+- If a property or component is not found, the function logs all available properties for easier debugging.
+- The function never dereferences a pointer without a null check, preventing access violations and improving plugin stability.
+- All handler functions in UnrealMCPBlueprintCommands.cpp now have robust null pointer checks and improved error logging, following the pattern of HandleSetComponentProperty.
+- Python automated tests for plugin command error cases have been added in Python/Tests/test_mcp_command_errors.py, covering missing/invalid parameters and non-existent assets for key handlers.
+- Next, we will test these changes in the editor and consider applying similar patterns to other command handlers.
+
+# Blueprint Cube Actor Implementation
+
+This feature adds a Blueprint-based cube actor to the game and spawns it above the ground.
+
+## Completed Tasks
+
+- [x] Created a new Blueprint named `CubeBlueprint` based on `Actor`
+- [x] Added a `StaticMeshComponent` to the Blueprint
+- [x] Set the mesh to the default cube
+- [x] Compiled the Blueprint
+- [x] Spawned the Blueprint actor above the ground at location [0, 0, 200]
+- [x] Added logic to rotate the cube constantly on all axes during play
+
+## In Progress Tasks
+
+- [ ] Add customization options for the cube (e.g., color, size)
+- [ ] Add interactivity or physics to the cube
+
+## Future Tasks
+
+- [ ] Implement spawning multiple Blueprint cubes with different properties
+- [ ] Add UI to control Blueprint actor spawning
+
+## Implementation Plan
+
+1. Create a new Blueprint based on the `Actor` class.
+2. Add a `StaticMeshComponent` and assign the default cube mesh.
+3. Compile the Blueprint to ensure it is ready for use.
+4. Spawn the Blueprint actor in the game world above the ground (e.g., at Z=200).
+5. Add a `RotationSpeed` variable and implement logic in the Blueprint's Tick event to rotate the actor on all axes.
+6. (Future) Add customization, interactivity, and UI for more advanced features.
+
+# Rotating Cube Blueprint Implementation
+
+A Blueprint that creates a cube which rotates continuously when the game is played.
+
+## Completed Tasks
+
+- [x] Created a new Actor Blueprint named `RotatingCubeBP`
+- [x] Added a Static Mesh Component with a cube mesh
+- [x] Implemented Tick event to rotate the cube every frame
+- [x] Compiled the Blueprint
+
+## In Progress Tasks
+
+- [ ] Spawn the RotatingCubeBP actor in the level automatically (manual placement recommended for now)
+
+## Future Tasks
+
+- [ ] Expose rotation speed as a variable
+- [ ] Allow rotation on different axes
+- [ ] Add start/stop controls via input
+
+## Implementation Plan
+
+1. Create an Actor Blueprint and add a Static Mesh Component set to a cube.
+2. Add logic to the Event Tick to rotate the actor every frame.
+3. Compile and test the Blueprint in the level.
+4. (Optional) Add variables and controls for more flexibility.
+
+# Epic Games Learning Crawler & Guideline Ingest
+
+Automates crawling, summarizing, and updating AI guidelines from Epic's Unreal Engine learning portal.
+
+## Completed Tasks
+- [x] Project plan and folder structure defined
+
+## In Progress Tasks
+- [ ] Scaffold tools/, cache/, config/ directories and required scripts
+- [ ] Implement crawl_epic_learning.py for discovery, scraping, and state update
+- [ ] Implement extract_rules.py for LLM summarization and deduplication
+- [ ] Implement update_guidelines.py for Markdown splicing
+- [ ] Implement orchestrator_hooks.py for pipeline orchestration
+- [ ] Add requirements.txt and config/guideline_ingest.yaml
+- [ ] Add GitHub Actions workflow for weekly ingest and auto-commit
+- [ ] Add README snippet for setup and usage
+
+## Future Tasks
+- [ ] Add more robust error handling and logging
+- [ ] Add dry-run/test mode for scripts
+- [ ] Extend rule categories or model config as needed
+
+## Implementation Plan
+1. Create tools/, cache/, cache/raw/, and config/ directories at the project root.
+2. Implement crawl_epic_learning.py to crawl, extract, and cache new tutorials/transcripts, updating consumed_sources.json.
+3. Implement extract_rules.py to summarize new transcripts into best-practice rules using OpenAI, dedupe, and save to rules.json.
+4. Implement update_guidelines.py to insert new rules into AI_GUIDELINES.md under the correct sections.
+5. Implement orchestrator_hooks.py to run the full pipeline from orchestrator.py or CLI.
+6. Add requirements.txt and config/guideline_ingest.yaml for dependencies and config.
+7. Add a GitHub Actions workflow for weekly automation and auto-commit.
+8. Document setup and usage in README.md.
+
