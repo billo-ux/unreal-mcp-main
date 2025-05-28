@@ -366,4 +366,190 @@ def register_editor_tools(mcp: FastMCP):
             logger.error(error_msg)
             return {"success": False, "message": error_msg}
 
+    @mcp.tool()
+    def save_level(ctx: Context, level_name: str = None) -> Dict[str, Any]:
+        """Save the current or specified level."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            params = {"level_name": level_name} if level_name else {}
+            response = unreal.send_command("save_level", params)
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error saving level: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def load_level(ctx: Context, level_name: str) -> Dict[str, Any]:
+        """Load a level by name."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("load_level", {"level_name": level_name})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error loading level: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def create_level(ctx: Context, level_name: str) -> Dict[str, Any]:
+        """Create a new level by name."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("create_level", {"level_name": level_name})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error creating level: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def duplicate_level(ctx: Context, source_level: str, new_level: str) -> Dict[str, Any]:
+        """Duplicate an existing level."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("duplicate_level", {"source_level": source_level, "new_level": new_level})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error duplicating level: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def delete_level(ctx: Context, level_name: str) -> Dict[str, Any]:
+        """Delete a level by name."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("delete_level", {"level_name": level_name})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error deleting level: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def undo(ctx: Context) -> Dict[str, Any]:
+        """Perform an undo action in the editor."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("undo", {})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error performing undo: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def redo(ctx: Context) -> Dict[str, Any]:
+        """Perform a redo action in the editor."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("redo", {})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error performing redo: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def run_editor_command(ctx: Context, command: str, args: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Run a generic editor command (with security checks)."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            # Security: Only allow whitelisted commands
+            allowed_commands = {"rebuild_navigation", "build_lighting", "play_in_editor"}
+            if command not in allowed_commands:
+                logger.error(f"Command '{command}' is not allowed.")
+                return {"success": False, "message": f"Command '{command}' is not allowed."}
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command(command, args or {})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error running editor command: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def get_world_settings(ctx: Context) -> Dict[str, Any]:
+        """Get world settings."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("get_world_settings", {})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error getting world settings: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def set_world_settings(ctx: Context, settings: Dict[str, Any]) -> Dict[str, Any]:
+        """Set world settings."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("set_world_settings", {"settings": settings})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error setting world settings: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def get_editor_preferences(ctx: Context) -> Dict[str, Any]:
+        """Get editor preferences."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("get_editor_preferences", {})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error getting editor preferences: {e}")
+            return {"success": False, "message": str(e)}
+
+    @mcp.tool()
+    def set_editor_preferences(ctx: Context, preferences: Dict[str, Any]) -> Dict[str, Any]:
+        """Set editor preferences."""
+        from unreal_mcp_server import get_unreal_connection
+        try:
+            unreal = get_unreal_connection()
+            if not unreal:
+                logger.error("Failed to connect to Unreal Engine")
+                return {"success": False, "message": "Failed to connect to Unreal Engine"}
+            response = unreal.send_command("set_editor_preferences", {"preferences": preferences})
+            return response or {"success": False, "message": "No response from Unreal Engine"}
+        except Exception as e:
+            logger.error(f"Error setting editor preferences: {e}")
+            return {"success": False, "message": str(e)}
+
     logger.info("Editor tools registered successfully")

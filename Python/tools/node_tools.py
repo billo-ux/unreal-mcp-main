@@ -1,5 +1,6 @@
 """
-Blueprint Node Tools for Unreal MCP.
+DEPRECATED: All node tools have been moved to node_graph_tools.py.
+This file is retained for backward compatibility and will be removed in a future release.
 
 This module provides tools for manipulating Blueprint graph nodes and connections.
 """

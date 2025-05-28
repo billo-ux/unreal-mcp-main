@@ -1,4 +1,7 @@
 """
+DEPRECATED: All Blueprint tools have been moved to basic_asset_tools.py or node_graph_tools.py.
+This file is retained for backward compatibility and will be removed in a future release.
+
 Blueprint Tools for Unreal MCP.
 
 This module provides tools for creating and manipulating Blueprint assets in Unreal Engine.

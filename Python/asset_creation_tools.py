@@ -1,7 +1,6 @@
 """
-Asset Creation Tools for Unreal MCP.
-
-This module provides tools for creating various Unreal Engine asset types programmatically.
+DEPRECATED: All asset creation tools have been moved to basic_asset_tools.py or advanced_asset_tools.py.
+This file is retained for backward compatibility and will be removed in a future release.
 """
 
 import logging

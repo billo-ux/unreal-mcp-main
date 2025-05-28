@@ -1,4 +1,7 @@
 """
+DEPRECATED: All UMG tools have been moved to ui_tools.py.
+This file is retained for backward compatibility and will be removed in a future release.
+
 UMG Tools for Unreal MCP.
 
 This module provides tools for creating and manipulating UMG Widget Blueprints in Unreal Engine.
